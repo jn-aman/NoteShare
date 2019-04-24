@@ -11,7 +11,7 @@ android {
     buildToolsVersion '28.0.3'
 
     defaultConfig {
-        applicationId "com.aman.firebase.udacity.friendlychat"
+        applicationId "com.aman.firebase.app.notesshare"
         minSdkVersion 16
         targetSdkVersion 26
         versionCode 1
@@ -38,6 +38,8 @@ dependencies {
     compile 'com.google.firebase:firebase-database:16.0.6'
     implementation 'com.google.firebase:firebase-auth:16.1.0'
     compile 'com.github.bumptech.glide:glide:3.6.1'
+    implementation 'com.otaliastudios:autocomplete:1.1.0'
+
     implementation 'com.google.firebase:firebase-core:16.0.7'
     implementation 'com.firebaseui:firebase-ui-auth:4.3.1'
     implementation  'com.google.firebase:firebase-storage:16.0.5'

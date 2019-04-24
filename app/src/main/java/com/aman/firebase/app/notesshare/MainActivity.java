@@ -1,6 +1,8 @@
 
-package com.aman.firebase.udacity.friendlychat;
+package com.aman.firebase.app.notesshare;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,10 +12,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -21,6 +26,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -32,7 +38,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.aman.firebase.udacity.friendlychat.R;
+import com.aman.firebase.app.notesshare.R;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,13 +59,31 @@ public class MainActivity extends AppCompatActivity {
     private EditText mMessageEditText;
     private Button mSendButton;
     private ChildEventListener mChildEventListener;
+    private ChildEventListener mChildEventListener2;
+
     private String mUsername;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mMessagesDatabaseReference;
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
 private FirebaseStorage mFirebaseStorage;
-private StorageReference mChatPhotosStorageReference;
+
+    public  static String a;
+    public static String b;
+    public static String c ;
+    public static String d;
+
+
+    ArrayList<String> coll=new ArrayList<String>();
+    ArrayList<String> cou=new ArrayList<String>();
+    ArrayList<String> semis=new ArrayList<String>();
+    ArrayList<String> suba=new ArrayList<String>();
+
+
+
+
+
+    private StorageReference mChatPhotosStorageReference;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +94,113 @@ private StorageReference mChatPhotosStorageReference;
         mFirebaseDatabase=FirebaseDatabase.getInstance();
         mMessagesDatabaseReference=mFirebaseDatabase.getReference().child("messages");
         // Initialize references to views
+
+
+
+
+
+
+
+
+
+
+
+        mMessagesDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+FriendlyMessage fm=child.getValue(FriendlyMessage.class);
+
+if(!coll.contains(fm.getCollege()))
+    coll.add(fm.getCollege());
+                    if(!cou.contains(fm.getCourse()))
+                    cou.add(fm.getCourse());
+                    if(!semis.contains(fm.getSemester()))
+                    semis.add(fm.getSemester());
+                    if(!suba.contains(fm.getSubject()))
+                    suba.add(fm.getSubject());
+//Toast.makeText(getApplicationContext(),fm.getCollege(), Toast.LENGTH_SHORT).show();
+                }
+
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
+
+
+
+//        String [] stringArray = coll.toArray(new String[coll.size()]);
+
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this,R.style.MyDialogTheme);
+        // Get the layout inflater
+        LayoutInflater inflater = MainActivity.this.getLayoutInflater();
+        View mView = inflater.inflate(R.layout.alertdialog_custom_view, null);
+        final AutoCompleteTextView college = (AutoCompleteTextView)mView.findViewById(R.id.et_name1);
+        final AutoCompleteTextView course = (AutoCompleteTextView)mView.findViewById(R.id.et_name2);
+        final AutoCompleteTextView sem = (AutoCompleteTextView)mView.findViewById(R.id.et_name3);
+        final AutoCompleteTextView subject = (AutoCompleteTextView)mView.findViewById(R.id.et_name4);
+
+
+
+//        String[] countries = getResources().getStringArray(R.array.countries_array);
+// Create the adapter and set it to the AutoCompleteTextView
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, coll);
+        college.setAdapter(adapter);
+
+        ArrayAdapter<String> adapter2 =
+                new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, cou);
+        course.setAdapter(adapter2);
+
+
+        ArrayAdapter<String> adapter3 =
+                new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, semis);
+        sem.setAdapter(adapter3);
+
+        ArrayAdapter<String> adapter4 =
+                new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, suba);
+        subject.setAdapter(adapter4);
+
+
+
+
+        builder.setView(mView)
+
+                // Add action buttons
+                .setPositiveButton("Go",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog,
+                                                int id) {
+
+                                a = college.getText().toString();
+                                b = course.getText().toString();
+                                c= sem.getText().toString();
+                                d = subject.getText().toString();
+    mMessagesDatabaseReference.addChildEventListener(mChildEventListener);
+
+
+
+
+                            }
+                        });
+
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+
+
+
+
+
+
+
+
 
         mFirebaseAuth=FirebaseAuth.getInstance();
 
@@ -135,7 +266,8 @@ private StorageReference mChatPhotosStorageReference;
             public void onClick(View view) {
 
 
-                FriendlyMessage friendlyMessage = new FriendlyMessage(mMessageEditText.getText().toString(), mUsername, null);
+                FriendlyMessage friendlyMessage = new FriendlyMessage(mMessageEditText.getText().toString(), mUsername, null,a,b,c,d);
+//                friendlyMessage.setOthers(a,b,c,d);
                 mMessagesDatabaseReference.push().setValue(friendlyMessage);
                 // Clear input box
                 mMessageEditText.setText("");
@@ -143,12 +275,89 @@ private StorageReference mChatPhotosStorageReference;
         });
 
 
+
+
+
+               mChildEventListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                List<FriendlyMessage> fm = new ArrayList<FriendlyMessage>();
+
+
+                FriendlyMessage friendlyMessage = dataSnapshot.getValue(FriendlyMessage.class);
+                fm.add(friendlyMessage);
+
+                for (FriendlyMessage element : fm) {
+//                    Toast.makeText(getApplicationContext(),element.getCollege(),Toast.LENGTH_SHORT).show();
+                    if((element.getCollege().equals(a)))
+                        if((element.getCourse().equals(b)))
+                            if(element.getSemester().equals(c))
+                                if(element.getSubject().equals(d))
+
+                                {                        mMessageAdapter.add(element);
+
+//                                            Toast.makeText(getApplicationContext(),element.getCollege(),Toast.LENGTH_SHORT).show();
+                                }
+
+                }
+
+
+//                for (FriendlyMessage element : fm) {
+//                        mMessageAdapter.add(element);
+//                }
+
+//                mMessageAdapter.add(friendlyMessage);
+
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   mAuthStateListener = new FirebaseAuth.AuthStateListener() {
       @Override
       public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
           FirebaseUser user=firebaseAuth.getCurrentUser();
-          if(user != null)
+          if(user != null )
           {
+
+
+
+
+
 
               onSignedInInitialize(user.getDisplayName());
 
@@ -229,14 +438,17 @@ public void onActivityResult(int requestCode, int resultCode, Intent data) {
                             @Override
                             public void onSuccess(Uri uri) {
                                 Uri dlUri = uri;
-                                FriendlyMessage friendlyMessage = new FriendlyMessage(null, mUsername, dlUri.toString());
+                                FriendlyMessage friendlyMessage = new FriendlyMessage(null, mUsername, dlUri.toString(),a,b,c,d);
+//                                friendlyMessage.setOthers(a,b,c,d);
                                 mMessagesDatabaseReference.push().setValue(friendlyMessage);
                             }
                         });
                     }
                 });
     }
-}
+
+
+    }
 
 @Override
     protected void onPause() {
@@ -254,6 +466,48 @@ super.onPause();
     protected void onResume() {
         super.onResume();
 mFirebaseAuth.addAuthStateListener(mAuthStateListener);
+
+
+
+    mMessagesDatabaseReference.addValueEventListener(new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+            mMessageAdapter.clear();
+            for (DataSnapshot child : dataSnapshot.getChildren()) {
+                FriendlyMessage fm=child.getValue(FriendlyMessage.class);
+//if(fm.getPhotoUrl()!=null)
+//{
+
+
+    if((fm.getCollege().equals(a)))
+        if((fm.getCourse().equals(b)))
+            if(fm.getSemester().equals(c))
+                if(fm.getSubject().equals(d))
+
+                {                        mMessageAdapter.add(fm);
+
+//                                            Toast.makeText(getApplicationContext(),element.getCollege(),Toast.LENGTH_SHORT).show();
+                }
+
+
+}
+
+//Toast.makeText(getApplicationContext(),fm.getCollege(), Toast.LENGTH_SHORT).show();
+//            }
+
+        }
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+        }
+    });
+
+
+
+
+
+
+
     }
 
 
@@ -261,35 +515,8 @@ mFirebaseAuth.addAuthStateListener(mAuthStateListener);
     private void onSignedInInitialize(String username ){
 mUsername=username;
 if(mChildEventListener==null){
-        mChildEventListener = new ChildEventListener() {
-            @Override
-            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                FriendlyMessage friendlyMessage = dataSnapshot.getValue(FriendlyMessage.class);
-                mMessageAdapter.add(friendlyMessage);
 
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        };
-        mMessagesDatabaseReference.addChildEventListener(mChildEventListener);
+//    mMessagesDatabaseReference.addChildEventListener(mChildEventListener);
 
     }
     }

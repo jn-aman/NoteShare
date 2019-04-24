@@ -1,4 +1,4 @@
-package com.aman.firebase.udacity.friendlychat;
+package com.aman.firebase.app.notesshare;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.aman.firebase.udacity.friendlychat.R;
+import com.aman.firebase.app.notesshare.R;
 
 import java.util.List;
 
